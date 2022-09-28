@@ -44,6 +44,7 @@ namespace es_script {
             addInput("advance", &m_parameters.advance);
             addInput("base_radius", &m_parameters.baseRadius);
             addInput("lobe_profile", &m_lobeProfile);
+            addInput("reduction_ratio", &m_parameters.ReductionRatio);
 
             ObjectReferenceNode<CamshaftNode>::registerInputs();
         }
