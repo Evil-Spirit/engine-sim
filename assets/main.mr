@@ -1,8 +1,16 @@
 import "engine_sim.mr"
 import "themes/default.mr"
-import "engines/audi/i5.mr"
+import "engines/steam/steam_from_husquarna135.mr"
 
-use_default_theme()
+unit_names units()
+
+use_default_theme(
+    speed_units: units.kph,
+    pressure_units: units.bar,
+    torque_units: units.Nm,
+    power_units: units.kW
+)
+
 set_engine(
-    audi_i5_2_2L()
+    steam_engine()
 )
