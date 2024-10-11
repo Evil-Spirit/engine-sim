@@ -34,7 +34,7 @@ class Engine : public Part {
             double starterTorque = units::torque(90.0, units::ft_lb);
             double starterSpeed = units::rpm(200);
             double redline = units::rpm(6500);
-            double dynoMinSpeed = units::rpm(1000);
+            double dynoMinSpeed = units::rpm(100);
             double dynoMaxSpeed = units::rpm(6500);
             double dynoHoldStep = units::rpm(100);
 

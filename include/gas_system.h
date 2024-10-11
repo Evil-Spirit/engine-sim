@@ -37,7 +37,7 @@ class GasSystem {
         ~GasSystem() { /* void */ }
 
         void setGeometry(double width, double height, double dx, double dy);
-        void initialize(double P, double V, double T, const Mix &mix = {}, int degreesOfFreedom = 5);
+        void initialize(double P, double V, double T, const Mix &mix = {}, int degreesOfFreedom = 6);
         void reset(double P, double T, const Mix &mix = {});
 
         void setVolume(double V);

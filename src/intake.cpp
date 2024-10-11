@@ -8,6 +8,9 @@ Intake::Intake() {
     m_inputFlowK = 0;
     m_idleFlowK = 0;
     m_flow = 0;
+    m_summaryFlow = 0.0;
+    m_averageFlow = 0.0;
+    m_flowCount = 0;
     m_throttle = 1.0;
     m_idleThrottlePlatePosition = 0.0;
     m_crossSectionArea = 0.0;
@@ -79,7 +82,7 @@ void Intake::process(double dt) {
     fuelMix.p_o2 = p_idle_air * 0.25;
 
     const double throttle = getThrottlePlatePosition();
-    const double flowAttenuation = std::cos(throttle * constants::pi / 2);
+    const double flowAttenuation = 1.0;//std::cos(throttle * constants::pi / 2);
 
     GasSystem::FlowParameters flowParams;
     flowParams.crossSectionArea_0 = units::area(10, units::m2);
@@ -89,16 +92,27 @@ void Intake::process(double dt) {
     flowParams.dt = dt;
 
     m_atmosphere.reset(m_atmospherePressure, m_atmosphereTemperature, fuelAirMix);
+
     flowParams.system_0 = &m_atmosphere;
     flowParams.system_1 = &m_system;
     flowParams.k_flow = flowAttenuation * m_inputFlowK;
     m_flow = m_system.flow(flowParams);
+    m_summaryFlow += m_flow / dt;
+    m_flowCount++;
+    m_averageFlow = m_summaryFlow / m_flowCount;
 
+    if(m_flowCount > 20000) {
+      m_flowCount--;
+      m_summaryFlow -= m_averageFlow;
+    }
+
+    /*
     m_atmosphere.reset(m_atmospherePressure, m_atmosphereTemperature, fuelMix);
     flowParams.system_0 = &m_atmosphere;
     flowParams.system_1 = &m_system;
     flowParams.k_flow = m_idleFlowK;
     const double idleCircuitFlow = m_system.flow(flowParams);
+    */
 
     m_system.dissipateExcessVelocity();
     m_system.updateVelocity(dt, m_velocityDecay);
@@ -107,7 +121,4 @@ void Intake::process(double dt) {
         m_totalFuelInjected += fuelAirMix.p_fuel * m_flow;
     }
 
-    if (idleCircuitFlow > 0) {
-        m_totalFuelInjected += fuelMix.p_fuel * idleCircuitFlow;
-    }
 }

@@ -1,6 +1,22 @@
 import "engine_sim.mr"
 import "themes/default.mr"
-import "engines/atg-video-2/01_subaru_ej25_eh.mr"
+//import "engines/steam/154F.mr"
+import "engines/steam/170F.mr"
+//import "engines/steam/steam_from_husquarna135.mr"
+//import "engines/audi/i5.mr"
+//import "engines/BMW/m52b28.mr"
 
-use_default_theme()
-main()
+unit_names units()
+
+use_default_theme(
+    speed_units: units.kph,
+    pressure_units: units.bar,
+    torque_units: units.Nm,
+    power_units: units.kW
+)
+
+set_engine(
+    steam_engine()
+    //audi_i5_2_2L()
+    //M52B28()
+)

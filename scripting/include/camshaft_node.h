@@ -25,6 +25,7 @@ namespace es_script {
         {
             Camshaft::Parameters parameters = m_parameters;
             parameters.crankshaft = crankshaft;
+            parameters.engine = context->getEngine();
             parameters.lobes = (int)m_lobes.size();
             parameters.lobeProfile = m_lobeProfile->generate(context);
             

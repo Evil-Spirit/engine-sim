@@ -57,6 +57,8 @@ class OscilloscopeCluster : public UiElement {
             *m_cylinderMoleculesScope,
             *m_sparkAdvanceScope,
             *m_pvScope,
+            *m_pvIntake,
+            *m_pvExhaust,
             *m_currentFocusScopes[MaxLayeredScopes];
         float m_updatePeriod;
         float m_updateTimer;

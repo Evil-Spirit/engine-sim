@@ -13,6 +13,9 @@ ExhaustSystem::ExhaustSystem() {
     m_flow = 0;
     m_index = -1;
     m_impulseResponse = nullptr;
+    m_averageFlow = 0.0;
+    m_summaryFlow = 0.0;
+    m_flowCount = 0;
 }
 
 ExhaustSystem::~ExhaustSystem() {
@@ -75,7 +78,8 @@ void ExhaustSystem::process(double dt) {
     flowParams.k_flow = m_outletFlowRate;
 
     m_flow = m_system.flow(flowParams);
-
+    auto k = 0.99999;
+    m_averageFlow = m_averageFlow * k + (m_flow / dt) * (1.0 - k);
     m_system.dissipateExcessVelocity();
     m_system.updateVelocity(dt, m_velocityDecay);
 }

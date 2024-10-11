@@ -33,6 +33,7 @@ class ExhaustSystem : public Part {
         inline int getIndex() const { return m_index; }
         inline double getLength() const { return m_length; }
         inline double getFlow() const { return m_flow; }
+        inline double getAverageFlow() const { return m_averageFlow; }
         inline double getAudioVolume() const { return m_audioVolume; }
         inline double getPrimaryFlowRate() const { return m_primaryFlowRate; }
         inline double getCollectorCrossSectionArea() const { return m_collectorCrossSectionArea; }
@@ -58,6 +59,9 @@ class ExhaustSystem : public Part {
         int m_index;
 
         double m_flow;
+        double m_averageFlow;
+        double m_summaryFlow;
+        int m_flowCount;
 };
 
 #endif /* ATG_ENGINE_SIM_EXHAUST_SYSTEM_H */

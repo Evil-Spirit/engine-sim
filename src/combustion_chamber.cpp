@@ -243,7 +243,7 @@ void CombustionChamber::flow(double dt) {
         cylinderHeight * constants::pi * m_head->getCylinderBank()->getBore()
         + m_cylinderCrossSectionSurfaceArea * 2;
 
-    const double dT = units::celcius(90.0) - m_system.temperature();
+    const double dT = units::celcius(200.0) - m_system.temperature();
 
     m_system.changeEnergy(dT * cylinderSurfaceArea * 100 * dt);
     m_system.flow(m_piston->getBlowbyK(), dt, m_crankcasePressure, units::celcius(25.0));

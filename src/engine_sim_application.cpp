@@ -181,7 +181,7 @@ void EngineSimApplication::initialize() {
         ? ysAudioSource::Mode::Loop
         : ysAudioSource::Mode::Stop);
     m_audioSource->SetPan(0.0f);
-    m_audioSource->SetVolume(1.0f);
+    m_audioSource->SetVolume(0.05f);
 
 #ifdef ATG_ENGINE_SIM_DISCORD_ENABLED
     // Create a global instance of discord-rpc
@@ -776,13 +776,13 @@ void EngineSimApplication::processEngineInput() {
     const double prevTargetThrottle = m_targetSpeedSetting;
     m_targetSpeedSetting = fineControlMode ? m_targetSpeedSetting : 0.0;
     if (m_engine.IsKeyDown(ysKey::Code::Q)) {
-        m_targetSpeedSetting = 0.01;
-    }
-    else if (m_engine.IsKeyDown(ysKey::Code::W)) {
         m_targetSpeedSetting = 0.1;
     }
+    else if (m_engine.IsKeyDown(ysKey::Code::W)) {
+        m_targetSpeedSetting = 0.3;
+    }
     else if (m_engine.IsKeyDown(ysKey::Code::E)) {
-        m_targetSpeedSetting = 0.2;
+        m_targetSpeedSetting = 0.5;
     }
     else if (m_engine.IsKeyDown(ysKey::Code::R)) {
         m_targetSpeedSetting = 1.0;

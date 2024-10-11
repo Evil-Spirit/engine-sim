@@ -7,6 +7,7 @@
 #include "units.h"
 
 class Crankshaft;
+class Engine;
 class Camshaft : public Part {
     public:
         struct Parameters {
@@ -21,6 +22,9 @@ class Camshaft : public Part {
 
             // Corresponding crankshaft
             Crankshaft *crankshaft;
+
+            // Corresponding crankshaft
+            Engine *engine;
 
             // Lobe profile
             Function *lobeProfile;
@@ -50,6 +54,7 @@ class Camshaft : public Part {
 
     private:
         Crankshaft *m_crankshaft;
+        Engine *m_engine;
         Function *m_lobeProfile;
         double *m_lobeAngles;
         double m_advance;

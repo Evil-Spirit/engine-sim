@@ -18,6 +18,8 @@ OscilloscopeCluster::OscilloscopeCluster() {
     m_sparkAdvanceScope = nullptr;
     m_cylinderMoleculesScope = nullptr;
     m_pvScope = nullptr;
+    m_pvIntake = nullptr;
+    m_pvExhaust = nullptr;
 
     for (int i = 0; i < MaxLayeredScopes; ++i) {
         m_currentFocusScopes[i] = nullptr;
@@ -48,6 +50,8 @@ void OscilloscopeCluster::initialize(EngineSimApplication *app) {
     m_cylinderPressureScope = addElement<Oscilloscope>(this);
     m_sparkAdvanceScope = addElement<Oscilloscope>(this);
     m_cylinderMoleculesScope = addElement<Oscilloscope>(this);
+    m_pvIntake = addElement<Oscilloscope>(this);
+    m_pvExhaust = addElement<Oscilloscope>(this);
     m_pvScope = addElement<Oscilloscope>(this);
 
     // Torque
@@ -78,7 +82,7 @@ void OscilloscopeCluster::initialize(EngineSimApplication *app) {
     m_totalExhaustFlowScope->m_yMax = units::flow(10, units::scfm);
     m_totalExhaustFlowScope->m_lineWidth = 2.0f;
     m_totalExhaustFlowScope->m_drawReverse = false;
-    m_totalExhaustFlowScope->i_color = m_app->getOrange();
+    m_totalExhaustFlowScope->i_color = m_app->getGreen();
 
     // Exhaust flow
     m_exhaustFlowScope->setBufferSize(1024);
@@ -88,7 +92,7 @@ void OscilloscopeCluster::initialize(EngineSimApplication *app) {
     m_exhaustFlowScope->m_yMax = units::flow(10.0, units::scfm);
     m_exhaustFlowScope->m_lineWidth = 2.0f;
     m_exhaustFlowScope->m_drawReverse = false;
-    m_exhaustFlowScope->i_color = m_app->getOrange();
+    m_exhaustFlowScope->i_color = m_app->getGreen();
 
     // Intake flow
     m_intakeFlowScope->setBufferSize(1024);
@@ -128,7 +132,7 @@ void OscilloscopeCluster::initialize(EngineSimApplication *app) {
     m_exhaustValveLiftScope->m_yMax = (float)units::distance(10, units::thou);
     m_exhaustValveLiftScope->m_lineWidth = 2.0f;
     m_exhaustValveLiftScope->m_drawReverse = false;
-    m_exhaustValveLiftScope->i_color = m_app->getOrange();
+    m_exhaustValveLiftScope->i_color = m_app->getGreen();
 
     m_intakeValveLiftScope->setBufferSize(1024);
     m_intakeValveLiftScope->m_xMin = 0.0f;
@@ -159,6 +163,28 @@ void OscilloscopeCluster::initialize(EngineSimApplication *app) {
     m_pvScope->m_drawReverse = true;
     m_pvScope->i_color = m_app->getOrange();
     m_pvScope->m_dynamicallyResizeX = true;
+
+    // Pressure volume intake
+    m_pvIntake->setBufferSize(1024);
+    m_pvIntake->m_xMin = 0.0f;
+    m_pvIntake->m_xMax = units::volume(0.1, units::L);
+    m_pvIntake->m_yMin = -(float)std::sqrt(units::pressure(1, units::psi));
+    m_pvIntake->m_yMax = (float)std::sqrt(units::pressure(1, units::psi));
+    m_pvIntake->m_lineWidth = 2.0f;
+    m_pvIntake->m_drawReverse = false;
+    m_pvIntake->i_color = m_app->getBlue();
+    m_pvIntake->m_dynamicallyResizeX = true;
+
+    // Pressure volume exhaust
+    m_pvExhaust->setBufferSize(1024);
+    m_pvExhaust->m_xMin = 0.0f;
+    m_pvExhaust->m_xMax = units::volume(0.1, units::L);
+    m_pvExhaust->m_yMin = -(float)std::sqrt(units::pressure(1, units::psi));
+    m_pvExhaust->m_yMax = (float)std::sqrt(units::pressure(1, units::psi));
+    m_pvExhaust->m_lineWidth = 2.0f;
+    m_pvExhaust->m_drawReverse = true;
+    m_pvExhaust->i_color = m_app->getGreen();
+    m_pvExhaust->m_dynamicallyResizeX = true;
 
     // Spark advance scope
     m_sparkAdvanceScope->setBufferSize(1024);
@@ -206,7 +232,8 @@ void OscilloscopeCluster::signal(UiElement *element, Event event) {
         }
         else if (element == m_pvScope) {
             m_currentFocusScopes[0] = m_pvScope;
-            m_currentFocusScopes[1] = nullptr;
+            m_currentFocusScopes[1] = m_pvIntake;
+            m_currentFocusScopes[2] = m_pvExhaust;
         }
         else if (
             element == m_intakeFlowScope
@@ -283,6 +310,16 @@ void OscilloscopeCluster::render() {
 
     const Bounds &cylinderPressureBounds = grid.get(m_bounds, 1, 3);
     renderScope(m_pvScope, cylinderPressureBounds, "pressure-volume");
+    m_pvIntake->m_xMin = m_pvScope->m_xMin;
+    m_pvIntake->m_xMax = m_pvScope->m_xMax;
+    m_pvIntake->m_yMin = m_pvScope->m_yMin;
+    m_pvIntake->m_yMax = m_pvScope->m_yMax;
+    renderScope(m_pvIntake, cylinderPressureBounds, "pressure-volume-intake");
+    m_pvExhaust->m_xMin = m_pvScope->m_xMin;
+    m_pvExhaust->m_xMax = m_pvScope->m_xMax;
+    m_pvExhaust->m_yMin = m_pvScope->m_yMin;
+    m_pvExhaust->m_yMax = m_pvScope->m_yMax;
+    renderScope(m_pvExhaust, cylinderPressureBounds, "pressure-volume-intake");
 
     const Bounds &totalExhaustPressureBounds = grid.get(m_bounds, 1, 2);
     renderScope(m_totalExhaustFlowScope, totalExhaustPressureBounds, "Total Exhaust Flow");
@@ -334,17 +371,30 @@ void OscilloscopeCluster::sample() {
         getCylinderMoleculesScope()->addDataPoint(
             cycleAngle,
             engine->getChamber(0)->m_system.n());
+        auto exhaustLift = engine->getChamber(0)->getCylinderHead()->exhaustValveLift(
+                engine->getChamber(0)->getPiston()->getCylinderIndex());
         getExhaustValveLiftOscilloscope()->addDataPoint(
             cycleAngle,
-            engine->getChamber(0)->getCylinderHead()->exhaustValveLift(
-                engine->getChamber(0)->getPiston()->getCylinderIndex()));
+            exhaustLift);
+        auto intakeLift = engine->getChamber(0)->getCylinderHead()->intakeValveLift(
+                        engine->getChamber(0)->getPiston()->getCylinderIndex());
         getIntakeValveLiftOscilloscope()->addDataPoint(
             cycleAngle,
-            engine->getChamber(0)->getCylinderHead()->intakeValveLift(
-                engine->getChamber(0)->getPiston()->getCylinderIndex()));
+            intakeLift);
+        auto cylinderPressure = /*std::sqrt(*/engine->getChamber(0)->m_system.pressure()/*)*/;
         getPvScope()->addDataPoint(
             engine->getChamber(0)->getVolume(),
-            std::sqrt(engine->getChamber(0)->m_system.pressure()));
+            cylinderPressure);
+        if(intakeLift > 0.0) {
+          m_pvIntake->addDataPoint(
+              engine->getChamber(0)->getVolume(),
+              cylinderPressure);
+        }
+        if(exhaustLift > 0.0) {
+          m_pvExhaust->addDataPoint(
+              engine->getChamber(0)->getVolume(),
+              cylinderPressure);
+        }
     }
 
     m_exhaustFlowScope->m_yMin = m_intakeFlowScope->m_yMin =

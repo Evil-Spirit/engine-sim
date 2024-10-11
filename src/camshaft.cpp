@@ -1,6 +1,7 @@
 #include "../include/camshaft.h"
 
 #include "../include/crankshaft.h"
+#include "../include/engine.h"
 #include "../include/constants.h"
 #include "../include/units.h"
 
@@ -27,6 +28,7 @@ void Camshaft::initialize(const Parameters &params) {
 
     m_lobes = params.lobes;
     m_crankshaft = params.crankshaft;
+    m_engine = params.engine;
     m_lobeProfile = params.lobeProfile;
     m_advance = params.advance;
     m_baseRadius = params.baseRadius;
@@ -41,7 +43,9 @@ void Camshaft::destroy() {
 }
 
 double Camshaft::valveLift(int lobe) const {
-    return sampleLobe(getAngle() + m_lobeAngles[lobe]);
+  auto throttle = 1 - m_engine->getThrottle();
+  auto phase_shift = throttle * 20 / 180.0 * 2.0 * constants::pi;
+    return sampleLobe(getAngle() + m_lobeAngles[lobe] - phase_shift);
 }
 
 double Camshaft::sampleLobe(double theta) const {

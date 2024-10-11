@@ -62,6 +62,9 @@ class Intake : public Part {
         double m_throttle;
 
         double m_flow;
+        double m_averageFlow;
+        double m_summaryFlow;
+        int m_flowCount;
         double m_flowRate;
         double m_totalFuelInjected;
 

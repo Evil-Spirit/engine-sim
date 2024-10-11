@@ -88,7 +88,7 @@ void RightGaugeCluster::initialize(EngineSimApplication *app) {
     m_speedometer->m_gauge->m_needleKd = 20.0f;
     m_speedometer->m_gauge->setBandCount(0);
 
-    m_manifoldVacuumGauge->m_title = "MANIFOLD PRESSURE";
+    m_manifoldVacuumGauge->m_title = "STEAM PRESSURE";
     m_manifoldVacuumGauge->m_unit = "inHg";
     m_manifoldVacuumGauge->m_precision = 0;
     m_manifoldVacuumGauge->setLocalPosition({ 0, 0 });
@@ -115,36 +115,12 @@ void RightGaugeCluster::initialize(EngineSimApplication *app) {
     m_manifoldVacuumGauge->m_gauge->setBand(
         { m_app->getForegroundColor(), -30, -22, 3.0f, 6.0f, shortenAngle, shortenAngle }, 4);
 
-    m_volumetricEffGauge->m_title = "VOLUMETRIC EFF.";
-    m_volumetricEffGauge->m_unit = "%";
-    m_volumetricEffGauge->m_spaceBeforeUnit = false;
-    m_volumetricEffGauge->m_precision = 1;
-    m_volumetricEffGauge->setLocalPosition({ 0, 0 });
-    m_volumetricEffGauge->m_gauge->m_min = 0;
-    m_volumetricEffGauge->m_gauge->m_max = 120;
-    m_volumetricEffGauge->m_gauge->m_minorStep = 5;
-    m_volumetricEffGauge->m_gauge->m_majorStep = 10;
-    m_volumetricEffGauge->m_gauge->m_maxMinorTick = 200;
-    m_volumetricEffGauge->m_gauge->m_thetaMin = (float)constants::pi * 1.2f;
-    m_volumetricEffGauge->m_gauge->m_thetaMax = -(float)constants::pi * 0.2f;
-    m_volumetricEffGauge->m_gauge->m_needleWidth = 4.0f;
-    m_volumetricEffGauge->m_gauge->m_gamma = 1.0f;
-    m_volumetricEffGauge->m_gauge->m_needleKs = 1000.0f;
-    m_volumetricEffGauge->m_gauge->m_needleKd = 50.0f;
-    m_volumetricEffGauge->m_gauge->setBandCount(3);
-    m_volumetricEffGauge->m_gauge->setBand(
-        { m_app->getBlue(), 30, 80, 3.0f, 6.0f, 0.0f, shortenAngle }, 0);
-    m_volumetricEffGauge->m_gauge->setBand(
-        { m_app->getGreen(), 80, 100, 3.0f, 6.0f, shortenAngle, shortenAngle }, 1);
-    m_volumetricEffGauge->m_gauge->setBand(
-        { m_app->getRed(), 100, 120, 3.0f, 6.0f, shortenAngle, -shortenAngle }, 2);
-
-    m_intakeCfmGauge->m_title = "AIR SCFM";
-    m_intakeCfmGauge->m_unit = "";
+    m_intakeCfmGauge->m_title = "STEAM CONS";
+    m_intakeCfmGauge->m_unit = "KG/H";
     m_intakeCfmGauge->m_precision = 1;
     m_intakeCfmGauge->setLocalPosition({ 0, 0 });
     m_intakeCfmGauge->m_gauge->m_min = 0;
-    m_intakeCfmGauge->m_gauge->m_max = 1200;
+    m_intakeCfmGauge->m_gauge->m_max = 100;
     m_intakeCfmGauge->m_gauge->m_minorStep = 20;
     m_intakeCfmGauge->m_gauge->m_majorStep = 100;
     m_intakeCfmGauge->m_gauge->m_maxMinorTick = 1200;
@@ -155,6 +131,23 @@ void RightGaugeCluster::initialize(EngineSimApplication *app) {
     m_intakeCfmGauge->m_gauge->m_needleKs = 1000.0f;
     m_intakeCfmGauge->m_gauge->m_needleKd = 50.0f;
     m_intakeCfmGauge->m_gauge->setBandCount(0);
+
+    m_volumetricEffGauge->m_title = "CONS KG/HP/H";
+    m_volumetricEffGauge->m_unit = "";
+    m_volumetricEffGauge->m_precision = 1;
+    m_volumetricEffGauge->setLocalPosition({ 0, 0 });
+    m_volumetricEffGauge->m_gauge->m_min = 0;
+    m_volumetricEffGauge->m_gauge->m_max = 30;
+    m_volumetricEffGauge->m_gauge->m_minorStep = 5;
+    m_volumetricEffGauge->m_gauge->m_majorStep = 10;
+    m_volumetricEffGauge->m_gauge->m_maxMinorTick = 1200;
+    m_volumetricEffGauge->m_gauge->m_thetaMin = (float)constants::pi * 1.2f;
+    m_volumetricEffGauge->m_gauge->m_thetaMax = -(float)constants::pi * 0.2f;
+    m_volumetricEffGauge->m_gauge->m_needleWidth = 4.0f;
+    m_volumetricEffGauge->m_gauge->m_gamma = 1.0f;
+    m_volumetricEffGauge->m_gauge->m_needleKs = 1000.0f;
+    m_volumetricEffGauge->m_gauge->m_needleKd = 50.0f;
+    m_volumetricEffGauge->m_gauge->setBandCount(0);
     //Set display units
     setUnits();
 }
@@ -270,12 +263,12 @@ void RightGaugeCluster::renderFuelAirCluster(const Bounds &bounds) {
 
     const Bounds cfmBounds = grid.get(right, 0, 1, 1, 1);
     m_intakeCfmGauge->m_bounds = cfmBounds;
-    m_intakeCfmGauge->m_gauge->m_value =
-        (float)units::convert(actualAirPerSecond, units::scfm);
+    auto flow = -m_engine->getExhaustSystem(0)->getAverageFlow() * 18/1000 * 3600;
+    m_intakeCfmGauge->m_gauge->m_value = flow;
 
     const Bounds volumetricEfficiencyBounds = grid.get(right, 0, 2, 1, 1);
     m_volumetricEffGauge->m_bounds = volumetricEfficiencyBounds;
-    m_volumetricEffGauge->m_gauge->m_value = 100.0f * (float)volumetricEfficiency;
+    m_volumetricEffGauge->m_gauge->m_value = flow / (m_simulator->getDynoPower() / 1000 * 1.36);
 }
 
 double RightGaugeCluster::getManifoldPressureWithUnits(double ambientPressure) {
